@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Soil Analysis // CaveScan</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono:wght@400;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+</head>
+<body style="padding-bottom: 20px;">
+
+    <!-- Header -->
+    <header>
+        <div style="display:flex; align-items:center; gap: 10px;">
+            <a href="web.html" style="color:var(--primary-color); font-size: 1.5rem;"><ion-icon name="arrow-back-outline"></ion-icon></a>
+            <h1>SOIL.DIAGNOSTICS</h1>
+        </div>
+        <div class="profile-icon">TP</div>
+    </header>
+
+    <main style="max-width: 600px; margin: 2rem auto;">
+        
+        <!-- Header Info -->
+        <div style="margin-bottom: 2rem; border-left: 2px solid var(--accent-color); padding-left: 1rem;">
+            <h2 style="color: var(--text-primary); margin-bottom: 0.5rem;">Soil Composition Breakdown</h2>
+            <div style="font-family: var(--font-mono); color: var(--text-secondary); font-size: 0.8rem;">
+                TARGET_ID: 884-X <br>
+                SECTOR: NORTH-EAST QUADRANT
+            </div>
+        </div>
+
+        <!-- Analysis Tool -->
+        <div id="analysis-tool" style="background: rgba(20, 25, 35, 0.7); backdrop-filter: blur(10px); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--grid-line); box-shadow: var(--shadow);">
+            
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display:block; font-family:var(--font-mono); color: var(--primary-color); font-size: 0.8rem; margin-bottom: 0.5rem;">>> INPUT RAW SENSOR DATA (HSV STREAM):</label>
+                <textarea id="hsv-input" rows="8" style="width:100%; background: #050505; color: #00ff00; border: 1px solid #333; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; padding: 1rem; resize: vertical; border-radius: 4px;" placeholder="Color(h=0, s=40, v=76)&#10;Color(h=40, s=40, v=76)..."></textarea>
+            </div>
+            
+            <button id="btn-analyze" style="width: 100%; padding: 12px; background: var(--primary-color); color: #000; border: none; font-weight: bold; cursor: pointer; font-family: var(--font-heading); font-size: 1rem; clip-path: polygon(0 0, 100% 0, 100% 85%, 95% 100%, 0% 100%); transition: filter 0.2s;">
+                INITIATE ANALYSIS SEQUENCE
+            </button>
+
+            <!-- Results Container -->
+            <div id="analysis-result" style="margin-top: 2rem; display: none; border-top: 1px dashed var(--grid-line); padding-top: 1.5rem;">
+                
+                <h3 style="color: var(--text-primary); margin-bottom: 1rem;">>> DIAGNOSTIC RESULTS</h3>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                    <!-- Avg Color -->
+                    <div style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px;">
+                        <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--text-secondary); display:block; margin-bottom: 0.5rem;">AVERAGE SOIL COLOR</span>
+                        <div id="result-color-box" style="width: 100%; height: 50px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2);"></div>
+                    </div>
+
+                    <!-- Risk Level -->
+                    <div style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px;">
+                         <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--text-secondary); display:block; margin-bottom: 0.5rem;">CALCULATED STATUS</span>
+                         <span id="result-risk" style="font-family: var(--font-heading); font-weight: 700; font-size: 1.1rem; color: #fff;">...</span>
+                    </div>
+                </div>
+
+                <!-- Risk Bar -->
+                <div>
+                    <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--text-secondary);">LANDSLIDE PROBABILITY MATRIX</span>
+                    <div style="height: 6px; width: 100%; background: #222; margin-top: 0.5rem; border-radius: 3px; overflow: hidden;">
+                        <div id="risk-bar" style="height: 100%; width: 0%; background: #00ff00; transition: width 1s ease-out, background-color 0.5s;"></div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-top: 4px; font-family:var(--font-mono); font-size: 0.6rem; color: #555;">
+                        <span>STABLE</span>
+                        <span>CRITICAL</span>
+                    </div>
+                </div>
+
+                <!-- Scientific Context (Gleysol/Redox) -->
+                <div id="analysis-details" style="display:none; margin-top: 15px; padding: 10px; background: rgba(0, 240, 255, 0.1); border-left: 3px solid #00F0FF; font-size: 0.8rem; line-height: 1.4; color: #ccc; font-family: var(--font-mono);">
+                    <!-- Details injected by JS -->
+                </div>
+
+                <img id="soil-reference-img" src="" style="display:none; width: 100%; border-radius: 8px; margin-top: 10px; border: 1px solid rgba(0,240,255,0.3);">
+
+            </div>
+        </div>
+
+        <!-- Geotechnical Research Database -->
+        <div style="margin-top: 2rem; background: rgba(20, 25, 35, 0.4); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--grid-line);">
+            <h3 style="color: var(--primary-color); font-family: var(--font-heading); margin-bottom: 1.5rem; font-size: 0.9rem; letter-spacing: 1px;">📚 GEOTECHNICAL RESEARCH DATABASE</h3>
+            
+            <!-- Category 1: Soil Morphology -->
+            <div style="margin-bottom: 1.5rem;">
+                <div style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--accent-color); margin-bottom: 0.75rem;">>> SOIL MORPHOLOGY & COLORIMETRY</div>
+                <div style="display: grid; gap: 8px;">
+                    <a href="https://www.nrcs.usda.gov/sites/default/files/2022-11/color-of-soil.pdf" target="_blank" class="ref-link">
+                        <span class="ref-title">USDA: The Color of Soil</span>
+                        <span class="ref-desc">Munsell system & redox status indicators (Gley/Iron)</span>
+                    </a>
+                    <a href="https://www.fao.org/soils-portal" target="_blank" class="ref-link">
+                        <span class="ref-title">FAO: Soils Portal</span>
+                        <span class="ref-desc">Global soil resource maps & diagnostic guidelines</span>
+                    </a>
+                    <a href="https://www.fao.org/4/a0541e/a0541e.pdf" target="_blank" class="ref-link">
+                        <span class="ref-title">FAO: Guidelines for Soil Description</span>
+                        <span class="ref-desc">Standardized color mottling & layer diagnostics</span>
+                    </a>
+                    <a href="https://www.fao.org/fishery/docs/CDrom/FAO_Training/FAO_Training/General/x6706e/x6706e05.htm" target="_blank" class="ref-link">
+                        <span class="ref-title">FAO: Soil Colour & Properties</span>
+                        <span class="ref-desc">Organic matter vs. drainage condition training</span>
+                    </a>
+                    <a href="https://agris.fao.org/search/en/providers/122535/records/65df0d9a63b8185d9caa7b2e" target="_blank" class="ref-link">
+                        <span class="ref-title">FAO: Iron Oxides & Soil Color</span>
+                        <span class="ref-desc">Goethite (Yellow) vs. Hematite (Red) mineralogy</span>
+                    </a>
+                    <a href="https://www.scielo.br/j/rbcs/a/cNSMM3FJwjQW5wJWtC4jv9G/?format=pdf&lang=en" target="_blank" class="ref-link">
+                        <span class="ref-title">SciELO: Pedogenic Iron Oxides</span>
+                        <span class="ref-desc">Chemical impact of iron oxides on soil pigment</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Category 2: Cave Stability -->
+            <div>
+                <div style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--accent-color); margin-bottom: 0.75rem;">>> STRUCTURAL STABILITY & CAVE MECHANISMS</div>
+                <div style="display: grid; gap: 8px;">
+                    <a href="https://www.researchgate.net/publication/353835627_Study_on_Ground_Collapse_of_Covered_Karst_Soil_Caves_by_Sudden_Drop_of_Groundwater" target="_blank" class="ref-link">
+                        <span class="ref-title">Karst Collapse: Groundwater Impact</span>
+                        <span class="ref-desc">Analysis of pore water pressure & cave-in triggers</span>
+                    </a>
+                    <a href="https://www.mdpi.com/2076-3417/14/18/8252" target="_blank" class="ref-link">
+                        <span class="ref-title">MDPI: Cave Collapse Mechanisms</span>
+                        <span class="ref-desc">Geotechnical engineering of Karst stability factor</span>
+                    </a>
+                    <a href="https://en.wikipedia.org/wiki/Sinkhole" target="_blank" class="ref-link">
+                        <span class="ref-title">Wiki: Sinkhole & Cave-in Dynamics</span>
+                        <span class="ref-desc">Summary of dissolution & subsurface surface collapse</span>
+                    </a>
+                    <a href="https://pubs.usgs.gov/circ/1325/pdf/C1325_508.pdf" target="_blank" class="ref-link">
+                        <span class="ref-title">USGS: Landslide Hazard Assessment</span>
+                        <span class="ref-desc">Water-induced shear strength loss in soil matrices</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        </div>
+
+        <!-- Research Hub Navigation -->
+        <nav class="nav-hub">
+            <a href="web.html" class="hub-item">
+                <ion-icon name="home-outline"></ion-icon>
+                <span>COMMAND</span>
+            </a>
+            <a href="cave_analysis.html" class="hub-item">
+                <ion-icon name="planet-outline"></ion-icon>
+                <span>CAVE SCAN</span>
+            </a>
+            <a href="soil_analysis.html" class="hub-item active">
+                <ion-icon name="cube-outline"></ion-icon>
+                <span>SOIL ASSETS</span>
+            </a>
+        </nav>
+
+    </main>
+
+    <style>
+        .ref-link {
+            display: flex;
+            flex-direction: column;
+            padding: 12px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        .ref-link:hover {
+            background: rgba(0, 240, 255, 0.1);
+            border-color: var(--primary-color);
+            transform: translateX(4px);
+        }
+        .ref-title {
+            color: var(--primary-color);
+            font-family: var(--font-heading);
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        .ref-desc {
+            color: var(--text-secondary);
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            opacity: 0.8;
+        }
+    </style>
+
+    <script src="js/soil_analysis.js"></script>
+</body>
+</html>
