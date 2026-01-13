@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Money Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Login Page (Overlay) -->
+    <div id="login-page" class="login-container">
+        <!-- Floating Background Blobs -->
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        
+        <div class="login-card-wrapper">
+            <div class="login-card">
+                <div class="login-icon">
+                    <!-- <i class="fas fa-wallet"></i> Removed old icon -->
+                </div>
+                <h2 class="login-title">Smart Money <span>Tracker</span></h2>
+                <p id="login-subtitle" class="login-subtitle">วางแผนการเงินสู่อนาคตที่มั่นคง เริ่มต้นวันนี้</p>
+                
+                <button id="login-btn-main" class="login-google-btn">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" width="20" style="vertical-align: middle; margin-right: 10px;">
+                    เข้าสู่ระบบด้วย Google
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App (Hidden by default) -->
+    <div id="main-app" class="app-container" style="display: none;">
+        <!-- Top Navigation -->
+       <nav class="top-nav">
+        <a href="#overview" class="nav-item active" id="nav-overview" onclick="switchTab('overview')">
+            <i class="fas fa-home"></i>
+        </a>
+        <a href="#report" class="nav-item" id="nav-report" onclick="switchTab('report')">
+            <i class="fas fa-chart-pie"></i>
+        </a>
+        <button id="theme-toggle" class="nav-item" style="background:none; border:none; cursor:pointer; margin-left:auto; font-size:1.1rem;">
+            <i class="fas fa-moon"></i>
+        </button>  
+        <div id="user-section" class="user-section">
+            <!-- User info/Login btn injected here -->
+        </div>
+    </nav>
+
+        <main id="overview-section" class="animate-enter">
+        <!-- Header Section -->
+        <header class="main-header">
+            <h1>ภาพรวม<span class="highlight">บัญชี</span></h1>
+            <p style="opacity: 0.8;">สถานะทางการเงินปัจจุบันของคุณ</p>
+        </header>
+
+        <!-- Dashboard Cards -->
+        <section class="dashboard">
+            <div class="card balance-card">
+                <h3>ยอดเงินคงเหลือ</h3>
+                <h2 id="balance">฿0.00</h2>
+            </div>
+            <div class="stats-row">
+                <div class="card income-card">
+                    <h3>รายรับ</h3>
+                    <p id="money-plus" class="money plus">+฿0.00</p>
+                </div>
+                <div class="card expense-card">
+                    <h3>รายจ่าย</h3>
+                    <p id="money-minus" class="money minus">-฿0.00</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Transaction Form -->
+        <section class="add-transaction">
+            <h3>เพิ่มรายการใหม่</h3>
+            <form id="form">
+                <div class="form-control">
+                    <label for="text">ชื่อรายการ</label>
+                    <input type="text" id="text" placeholder="ระบุชื่อรายการ..." required>
+                </div>
+                <div class="form-row">
+                    <div class="form-control">
+                        <label>หมวดหมู่</label>
+                        <div class="select-wrapper">
+                            <select id="category">
+                                <option value="food">🍔 อาหาร</option>
+                                <option value="transport">🚕 เดินทาง</option>
+                                <option value="utilities">💡 น้ำ-ไฟ</option>
+                                <option value="shopping">🛍️ ช้อปปิ้ง</option>
+                                <option value="entertainment">🎬 บันเทิง</option>
+                                <option value="salary">💰 เงินเดือน</option>
+                                <option value="business">💼 ธุรกิจ</option>
+                                <option value="other">📝 อื่นๆ</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-control">
+                        <label>ประเภทรายการ</label>
+                        <div class="type-toggle">
+                            <input type="radio" name="type" id="type-expense" value="expense" checked>
+                            <label for="type-expense" class="toggle-btn expense-btn">รายจ่าย</label>
+
+                            <input type="radio" name="type" id="type-income" value="income">
+                            <label for="type-income" class="toggle-btn income-btn">รายรับ</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-control">
+                        <label for="amount">จำนวนเงิน</label>
+                        <input type="number" id="amount" placeholder="0" min="0" step="any" required>
+                    </div>
+                    <div class="form-control">
+                        <label for="date">วันที่</label>
+                        <input type="date" id="date" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn">เพิ่มรายการ <i class="fas fa-plus"></i></button>
+            </form>
+        </section>
+
+        <!-- Transaction List -->
+        <section class="history">
+            <div class="history-header">
+                <h3>ประวัติรายการ</h3>
+                <div class="glass-pill-container">
+                    <select id="period-filter" class="glass-input">
+                        <option value="all">ทั้งหมด</option>
+                        <option value="week">สัปดาห์นี้</option>
+                        <option value="month">เลือกเดือน...</option>
+                    </select>
+                    <input type="month" id="month-picker" class="glass-input" style="display: none;">
+                </div>
+            </div>
+            <ul id="list" class="list">
+                <!-- Transactions will be injected here -->
+            </ul>
+        </section>
+        </main> <!-- End Overview Section -->
+
+        <!-- Report Section -->
+        <main id="report-section" style="display: none;" class="animate-enter">
+            <div class="report-header" style="display: flex; flex-direction: column; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+                <!-- Report Type Toggle (Income/Expense) -->
+                <div class="type-toggle" style="width: 240px; height: 44px; margin-bottom: 0.5rem;">
+                    <input type="radio" name="report-type" id="report-type-expense" value="expense" checked>
+                    <label for="report-type-expense" class="toggle-btn expense-btn">รายจ่าย</label>
+
+                    <input type="radio" name="report-type" id="report-type-income" value="income">
+                    <label for="report-type-income" class="toggle-btn income-btn">รายรับ</label>
+
+                    <input type="radio" name="report-type" id="report-type-comparison" value="comparison">
+                    <label for="report-type-comparison" class="toggle-btn comparison-btn">สรุป</label>
+                </div>
+
+                <!-- Time Filter Controls -->
+                <div class="glass-pill-container" style="margin-top: 5px;">
+                    <!-- Mode Select -->
+                     <select id="report-period-mode" class="glass-input">
+                        <option value="month">รายเดือน</option>
+                        <option value="week">รายสัปดาห์</option>
+                    </select>
+                    <div class="divider"></div>
+                    <!-- Date Pickers -->
+                    <input type="month" id="report-month-picker" class="glass-input">
+                    <input type="week" id="report-week-picker" class="glass-input" style="display: none;">
+                </div>
+            </div>
+
+            <section class="chart-container">
+                <canvas id="expense-chart"></canvas>
+            </section>
+            
+            <!-- Insight Card -->
+            <div id="insight-container">
+            </div>
+        </main>
+
+    </div>
+
+    <script type="module" src="app.js"></script>
+    <script>
+        function switchTab(tab) {
+            const overview = document.getElementById('overview-section');
+            const report = document.getElementById('report-section');
+            const navItems = document.querySelectorAll('.nav-item');
+            
+            if (tab === 'overview') {
+                overview.style.display = 'block';
+                report.style.display = 'none';
+                navItems[0].classList.add('active');
+                navItems[1].classList.remove('active');
+            } else {
+                overview.style.display = 'none';
+                report.style.display = 'block';
+                navItems[0].classList.remove('active');
+                navItems[1].classList.add('active');
+                if (typeof updateChart === 'function') updateChart();
+            }
+        }
+    </script>
+</body>
+</html>
